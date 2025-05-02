@@ -69,6 +69,29 @@ public class FSM {
         return true;
     }
 
+    public String executeInput(String input) {
+        if (initialState == null) return "NO";
+        
+        String currentState = initialState;
+        StringBuilder stateSequence = new StringBuilder(currentState);
+
+        for (char c : input.toCharArray()) {
+            c = Character.toLowerCase(c);
+            if (!symbols.contains(c)) {
+                throw new IllegalArgumentException("Invalid symbol: " + c);
+            }
+
+            Transition transition = transitionContainer.getTransitionWithSymbolAndCurrentState(c, currentState);
+            if (transition == null) {
+                return stateSequence.toString() + " NO";
+            }
+            currentState = transition.getNextState();
+            stateSequence.append(" ").append(currentState);
+        }
+
+        return stateSequence + (finalStates.contains(currentState) ? " YES" : " NO");
+    }
+
     public boolean isValidSymbol(char symbol) {
         return Character.isLetterOrDigit(symbol);
     }
