@@ -1,11 +1,11 @@
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
-public class TransitionContainer {
-    private List<Transition> transitions;
+public class TransitionContainer implements Serializable {
+     ArrayList<Transition> transitions = new ArrayList<>();
 
-    public TransitionContainer() {
-        transitions = new ArrayList<>();
+    public ArrayList<Transition> getTransitions() {
+        return transitions;
     }
 
     public void addTransition(Transition transition) {
@@ -13,12 +13,8 @@ public class TransitionContainer {
     }
 
     public Transition getTransitionWithSymbolAndCurrentState(char symbol, String currentState) {
-        symbol = Character.toLowerCase(symbol);
-        currentState = currentState.toLowerCase();
-        
         for (Transition transition : transitions) {
-            if (transition.getSymbol() == symbol && 
-                transition.getCurrentState().equals(currentState)) {
+            if (transition.getSymbol() == symbol && transition.getCurrentState().equals(currentState)) {
                 return transition;
             }
         }
@@ -28,4 +24,6 @@ public class TransitionContainer {
     public void clear() {
         transitions.clear();
     }
+
+
 }
