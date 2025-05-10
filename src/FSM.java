@@ -1,22 +1,21 @@
-import java.util.HashSet;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.*;
 
-public class FSM {
+public class FSM implements Serializable {
     private Set<Character> symbols;
     private Set<String> states;
     private String initialState;
     private Set<String> finalStates;
-    private TransitionContainer transitionContainer;
+    private TransitionContainer transitionContainer = new TransitionContainer();
 
     public FSM() {
         symbols = new HashSet<>();
         states = new HashSet<>();
         finalStates = new HashSet<>();
-        transitionContainer = new TransitionContainer();
     }
 
     public boolean addSymbol(char symbol) {
-        if (!isValidSymbol(symbol)) {
+        if (!Character.isLetterOrDigit(symbol)) {
             return false;
         }
         return symbols.add(Character.toLowerCase(symbol));
@@ -65,31 +64,16 @@ public class FSM {
         if (!states.contains(currentState)) return false;
         if (!states.contains(nextState)) return false;
 
-        transitionContainer.addTransition(new Transition(symbol, currentState, nextState));
+        transitionContainer.addTransition(new Transition(symbol, currentState,nextState));
         return true;
     }
 
-    public String executeInput(String input) {
-        if (initialState == null) return "NO";
-        
-        String currentState = initialState;
-        StringBuilder stateSequence = new StringBuilder(currentState);
-
-        for (char c : input.toCharArray()) {
-            c = Character.toLowerCase(c);
-            if (!symbols.contains(c)) {
-                throw new IllegalArgumentException("Invalid symbol: " + c);
-            }
-
-            Transition transition = transitionContainer.getTransitionWithSymbolAndCurrentState(c, currentState);
-            if (transition == null) {
-                return stateSequence.toString() + " NO";
-            }
-            currentState = transition.getNextState();
-            stateSequence.append(" ").append(currentState);
-        }
-
-        return stateSequence + (finalStates.contains(currentState) ? " YES" : " NO");
+    public void clear() {
+        symbols.clear();
+        states.clear();
+        finalStates.clear();
+        transitionContainer.clear();
+        initialState = null;
     }
 
     public boolean isValidSymbol(char symbol) {
@@ -102,11 +86,11 @@ public class FSM {
     }
 
     public Set<Character> getSymbols() {
-        return new HashSet<>(symbols);
+        return Collections.unmodifiableSet(symbols);
     }
 
     public Set<String> getStates() {
-        return new HashSet<>(states);
+        return Collections.unmodifiableSet(states);
     }
 
     public String getInitialState() {
@@ -114,14 +98,30 @@ public class FSM {
     }
 
     public Set<String> getFinalStates() {
-        return new HashSet<>(finalStates);
+        return Collections.unmodifiableSet(finalStates);
     }
 
-    public void clear() {
-        symbols.clear();
-        states.clear();
-        finalStates.clear();
-        transitionContainer.clear();
-        initialState = null;
+    public String executeInput(String input) {
+        if (initialState == null) return "NO";
+        
+        StringBuilder stateSequence = new StringBuilder();
+        String currentState = initialState;
+        stateSequence.append(currentState);
+
+        for (char c : input.toCharArray()) {
+            c = Character.toLowerCase(c);
+            if (!symbols.contains(c)) {
+                throw new IllegalArgumentException("Invalid symbol: " + c);
+            }
+
+            Transition transition = transitionContainer.getTransitionWithSymbolAndCurrentState(c, currentState);
+            if (transition == null) {
+                return stateSequence.toString() + " NO";
+            }
+            stateSequence.append(" ").append(transition.getNextState());
+            currentState = transition.getNextState();
+        }
+
+        return stateSequence + (finalStates.contains(currentState) ? " YES" : " NO");
     }
 }
